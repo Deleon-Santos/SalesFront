@@ -507,6 +507,11 @@ dialog::backdrop {
     background: var(--perigo);
 }
 
+/* Regra global para garantir que o atributo hidden funcione perfeitamente */
+[hidden] {
+    display: none !important;
+}
+
 @media (max-width: 900px) {
     .barra-superior {
         grid-template-columns: 1fr auto;
