@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interface de frente de caixa do Sales-PDV">
+    <title>Sales-PDV | Frente de Caixa</title>
+    <link rel="stylesheet" href="./css/pdv.css">
+</head>
+<body>
+    <main class="aplicacao">
+
+        <header class="barra-superior">
+            <div class="marca">
+                <span class="marca-icone">🛒</span>
+                <div>
+                    <strong>SALES-PDV</strong>
+                    <small>Frente de Caixa</small>
+                </div>
+            </div>
+
+            <div class="status-caixa">
+                <span class="indicador"></span>
+                <span>CAIXA 01</span>
+            </div>
+
+            <div class="operador">
+                <span id="nome-operador">Não autenticado</span>
+                <button id="btn-sair" class="botao-secundario" type="button">
+                    Sair
+                </button>
+            </div>
+        </header>
+
+        <section id="painel-login" class="tela-login">
+            <div class="cartao-login">
+                <div class="logo-login">🛒</div>
+                <h1>Frente de Caixa</h1>
+                <p>Entre para iniciar uma operação de venda.</p>
+
+                <form id="form-login" autocomplete="off">
+                    <label for="usuario">Usuário</label>
+                    <input id="usuario" name="usuario" type="text"
+                           autocomplete="username" required autofocus>
+
+                    <label for="senha">Senha</label>
+                    <input id="senha" name="senha" type="password"
+                           autocomplete="current-password" required>
+
+                    <button class="botao-primario botao-login" type="submit">
+                        Entrar no caixa
+                    </button>
+
+                    <p id="mensagem-login" class="mensagem erro" hidden></p>
+                </form>
+            </div>
+        </section>
+
+        <section id="painel-pdv" class="pdv" hidden>
+            <div class="cabecalho-operacao">
+                <div>
+                    <span class="rotulo">VENDA ATUAL</span>
+                    <strong id="numero-venda">Nenhuma venda</strong>
+                </div>
+
+                <div class="data-hora" id="data-hora"></div>
+            </div>
+
+            <div class="entrada-produto">
+                <div class="campo-codigo">
+                    <label for="codigo-produto">Código / ID do produto</label>
+                    <input id="codigo-produto"
+                           type="number"
+                           min="1"
+                           inputmode="numeric"
+                           placeholder="Informe o ID do produto"
+                           disabled>
+                </div>
+
+                <div class="campo-quantidade">
+                    <label for="quantidade-produto">Quantidade</label>
+                    <input id="quantidade-produto"
+                           type="number"
+                           min="1"
+                           step="1"
+                           value="1"
+                           disabled>
+                </div>
+
+                <button id="btn-adicionar" class="botao-adicionar"
+                        type="button" disabled>
+                    Adicionar
+                </button>
+            </div>
+
+            <div id="mensagem-pdv" class="mensagem" hidden></div>
+
+            <div class="area-venda">
+                <section class="lista-produtos">
+                    <div class="titulo-lista">
+                        <span>ITENS DA VENDA</span>
+                        <span id="quantidade-itens">0 itens</span>
+                    </div>
+
+                    <div class="tabela-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Qtd.</th>
+                                    <th>Produto</th>
+                                    <th>Preço unit.</th>
+                                    <th>Subtotal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-produtos">
+                                <tr class="vazio">
+                                    <td colspan="5">
+                                        Nenhum item adicionado
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <aside class="resumo-venda">
+                    <span class="rotulo">TOTAL DA VENDA</span>
+                    <strong id="total-venda">R$ 0,00</strong>
+
+                    <div class="acoes-venda">
+                        <button id="btn-finalizar"
+                                class="botao-finalizar"
+                                type="button" disabled>
+                            Finalizar venda
+                        </button>
+
+                        <button id="btn-cancelar"
+                                class="botao-cancelar"
+                                type="button" disabled>
+                            Cancelar venda
+                        </button>
+
+                        <button id="btn-nova-venda"
+                                class="botao-secundario"
+                                type="button">
+                            Nova venda
+                        </button>
+                    </div>
+                </aside>
+            </div>
+
+            <footer class="atalhos">
+                <span><kbd>F2</kbd> Nova venda</span>
+                <span><kbd>F3</kbd> Código</span>
+                <span><kbd>F4</kbd> Quantidade</span>
+                <span><kbd>F10</kbd> Finalizar</span>
+                <span><kbd>ESC</kbd> Cancelar</span>
+            </footer>
+        </section>
+    </main>
+
+    <dialog id="modal-pagamento">
+        <form method="dialog" id="form-pagamento" class="modal-conteudo">
+            <button class="fechar-modal" value="cancel" type="submit"
+                    aria-label="Fechar">×</button>
+
+            <h2>Finalizar venda</h2>
+            <p>Escolha a forma de pagamento.</p>
+
+            <div class="opcoes-pagamento">
+                <label>
+                    <input type="radio" name="forma_pagamento"
+                           value="DINHEIRO" required>
+                    <span>Dinheiro</span>
+                </label>
+                <label>
+                    <input type="radio" name="forma_pagamento"
+                           value="DEBITO">
+                    <span>Débito</span>
+                </label>
+                <label>
+                    <input type="radio" name="forma_pagamento"
+                           value="CREDITO">
+                    <span>Crédito</span>
+                </label>
+                <label>
+                    <input type="radio" name="forma_pagamento"
+                           value="PIX">
+                    <span>PIX</span>
+                </label>
+            </div>
+
+            <div class="acoes-modal">
+                <button value="cancel" class="botao-secundario" type="submit">
+                    Voltar
+                </button>
+                <button id="btn-confirmar-pagamento"
+                        value="default"
+                        class="botao-finalizar"
+                        type="submit">
+                    Confirmar pagamento
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <div id="notificacao" class="notificacao" role="status" aria-live="polite"></div>
+
+    <script type="module" src="./js/pdv.js"></script>
+</body>
+</html>
