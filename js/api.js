@@ -34,13 +34,10 @@ async function requisicao(caminho, opcoes = {}) {
         cabecalhos.set("Authorization", `Bearer ${accessToken}`);
     }
 
-    const resposta = await fetch(
-        `${CONFIGURACAO.baseUrl}${caminho}`,
-        {
-            ...opcoes,
-            headers: cabecalhos,
-        },
-    );
+    const resposta = await fetch(`${CONFIGURACAO.baseUrl}${caminho}`, {
+        ...opcoes,
+        headers: cabecalhos,
+    });
 
     // JWT expirado: limpa a sessão e obriga novo login.
     if (resposta.status === 401) {
@@ -69,20 +66,17 @@ async function requisicao(caminho, opcoes = {}) {
 }
 
 export async function autenticar(usuario, senha) {
-    const resposta = await fetch(
-        `${CONFIGURACAO.baseUrl}/auth/token/`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            body: JSON.stringify({
-                username: usuario,
-                password: senha,
-            }),
+    const resposta = await fetch(`${CONFIGURACAO.baseUrl}/auth/token/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
         },
-    );
+        body: JSON.stringify({
+            username: usuario,
+            password: senha,
+        }),
+    });
 
     if (!resposta.ok) {
         throw new Error("Usuário ou senha inválidos.");
@@ -109,13 +103,18 @@ export function buscarVenda(id) {
 
 // POST /api/itens-venda/
 export function adicionarItem(vendaId, produtoId, quantidade) {
+    const corpo = {
+        venda: vendaId,
+        produto: produtoId,
+        quantidade,
+    };
+    const corpoJson = JSON.stringify(corpo);
+
+    console.log("JSON enviado para adicionar produto:", corpoJson);
+
     return requisicao("/itens-venda/", {
         method: "POST",
-        body: JSON.stringify({
-            venda: vendaId,
-            produto: produtoId,
-            quantidade,
-        }),
+        body: corpoJson,
     });
 }
 

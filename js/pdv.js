@@ -29,10 +29,12 @@ const elementos = {
     btnSair: document.querySelector("#btn-sair"),
     codigoProduto: document.querySelector("#codigo-produto"),
     quantidadeProduto: document.querySelector("#quantidade-produto"),
+    quantidadeItem: document.querySelector("#quantidade-item"),
     btnAdicionar: document.querySelector("#btn-adicionar"),
     listaProdutos: document.querySelector("#lista-produtos"),
     quantidadeItens: document.querySelector("#quantidade-itens"),
     totalVenda: document.querySelector("#total-venda"),
+    precoUnitario: document.querySelector("#preco-unitario"),
     numeroVenda: document.querySelector("#numero-venda"),
     dataHora: document.querySelector("#data-hora"),
     btnFinalizar: document.querySelector("#btn-finalizar"),
@@ -73,18 +75,16 @@ function notificar(mensagem, tipo = "sucesso") {
 }
 
 function atualizarRelogio() {
-    elementos.dataHora.textContent = new Intl.DateTimeFormat(
-        "pt-BR",
-        {
-            dateStyle: "short",
-            timeStyle: "medium",
-        },
-    ).format(new Date());
+    elementos.dataHora.textContent = new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "medium",
+    }).format(new Date());
 }
 
 function habilitarOperacao(habilitado) {
     elementos.codigoProduto.disabled = !habilitado;
     elementos.quantidadeProduto.disabled = !habilitado;
+    elementos.quantidadeItem.disabled = !habilitado;
     elementos.btnAdicionar.disabled = !habilitado;
     elementos.btnCancelar.disabled = !habilitado;
     elementos.btnFinalizar.disabled = !habilitado;
@@ -101,8 +101,7 @@ function mostrarLogin() {
 function mostrarPdv() {
     elementos.painelLogin.hidden = true;
     elementos.painelPdv.hidden = false;
-    elementos.nomeOperador.textContent =
-        estado.operador?.username || "Operador";
+    elementos.nomeOperador.textContent = estado.operador?.username || "Operador";
 }
 
 function renderizarVenda() {
@@ -111,6 +110,7 @@ function renderizarVenda() {
     if (!venda) {
         elementos.numeroVenda.textContent = "Nenhuma venda";
         elementos.totalVenda.textContent = formatarMoeda(0);
+        elementos.precoUnitario.textContent = formatarMoeda(0);
         elementos.quantidadeItens.textContent = "0 itens";
         elementos.listaProdutos.innerHTML = `
             <tr class="vazio">
@@ -120,8 +120,11 @@ function renderizarVenda() {
         habilitarOperacao(false);
         return;
     }
+    const numeroVendaFormatado = String(venda.id).padStart(4, "0");
 
-    elementos.numeroVenda.textContent = `Venda #${venda.id}`;
+    // Atualizando o texto no DOM
+    document.getElementById("numero-venda").textContent =
+        `Cupom ${numeroVendaFormatado}`;
     elementos.totalVenda.textContent = formatarMoeda(venda.total);
 
     const itens = venda.itens || [];
@@ -130,25 +133,35 @@ function renderizarVenda() {
         0,
     );
 
-    elementos.quantidadeItens.textContent =
-        `${quantidadeTotal} ${quantidadeTotal === 1 ? "item" : "itens"}`;
+    elementos.quantidadeItens.textContent = `${quantidadeTotal} ${quantidadeTotal === 1 ? "item" : "itens"}`;
 
     if (!itens.length) {
         elementos.listaProdutos.innerHTML = `
             <tr class="vazio">
-                <td colspan="5">Nenhum item adicionado</td>
+                <td colspan="4">Nenhum item adicionado</td>
             </tr>
         `;
     } else {
-        elementos.listaProdutos.innerHTML = itens.map((item) => `
+        elementos.listaProdutos.innerHTML = itens
+            .map(
+                (item) => `
             <tr>
-                <td>${item.quantidade}</td>
                 <td>
-                    <strong>${escaparHtml(item.nome_produto)}</strong>
-                    <small>#${item.produto}</small>
+                    <small>${item.id}</small>
+                    <small>${item.outro_campo ?? "-"}</smail>
                 </td>
-                <td>${formatarMoeda(item.preco_unitario)}</td>
-                <td>${formatarMoeda(item.subtotal)}</td>
+                <td>
+                    <small>${escaparHtml(item.nome_produto)}</small>
+                    <small>${item.produto}</small>
+                </td>
+                <td>
+                    <small>${formatarMoeda(item.preco_unitario)}</small>
+                    <small>${item.quantidade}</small>
+                </td>
+                <td>
+                    <small>${formatarMoeda(item.subtotal)}</small>
+                    <small>${"-"}</small>
+                </td>
                 <td>
                     <button
                         class="botao-remover"
@@ -158,7 +171,9 @@ function renderizarVenda() {
                     >×</button>
                 </td>
             </tr>
-        `).join("");
+        `,
+            )
+            .join("");
     }
 
     const vendaAberta = venda.situacao === "ABERTA";
@@ -175,7 +190,10 @@ function escaparHtml(valor) {
         "'": "&#039;",
     };
 
-    return String(valor ?? "").replace(/[&<>"']/g, (caractere) => mapa[caractere]);
+    return String(valor ?? "").replace(
+        /[&<>"']/g,
+        (caractere) => mapa[caractere],
+    );
 }
 
 async function atualizarVenda() {
@@ -185,6 +203,7 @@ async function atualizarVenda() {
     }
 
     estado.venda = await buscarVenda(estado.venda.id);
+    console.log("Venda completa:", estado.venda);
     renderizarVenda();
 }
 
@@ -192,10 +211,12 @@ async function iniciarNovaVenda() {
     try {
         esconderMensagem(elementos.mensagemPdv);
         estado.venda = await criarVenda();
+        elementos.quantidadeProduto.value = "";
+        elementos.precoUnitario.textContent = formatarMoeda(0);
         renderizarVenda();
 
         elementos.codigoProduto.focus();
-        notificar(`Venda #${estado.venda.id} iniciada.`);
+        notificar(`Venda ${estado.venda.id} iniciada.`);
     } catch (erro) {
         mostrarMensagem(elementos.mensagemPdv, erro.message);
     }
@@ -208,39 +229,43 @@ async function adicionarProdutoNaVenda() {
     }
 
     const produtoId = Number(elementos.codigoProduto.value);
-    const quantidade = Number(elementos.quantidadeProduto.value);
+    const quantidade = Number(elementos.quantidadeItem.value);
 
     if (!Number.isInteger(produtoId) || produtoId <= 0) {
-        mostrarMensagem(
-            elementos.mensagemPdv,
-            "Informe um ID de produto válido.",
-        );
+        mostrarMensagem(elementos.mensagemPdv, "Informe um ID de produto válido.");
         elementos.codigoProduto.focus();
         return;
     }
 
     if (!Number.isInteger(quantidade) || quantidade <= 0) {
-        mostrarMensagem(
-            elementos.mensagemPdv,
-            "Informe uma quantidade válida.",
-        );
-        elementos.quantidadeProduto.focus();
+        mostrarMensagem(elementos.mensagemPdv, "Informe uma quantidade válida.");
+        elementos.quantidadeItem.focus();
         return;
     }
 
     try {
         esconderMensagem(elementos.mensagemPdv);
 
-        await adicionarItem(
+        const respostaItem = await adicionarItem(
             estado.venda.id,
             produtoId,
             quantidade,
         );
+        console.log("Resposta da inclusão do produto:", respostaItem);
 
         await atualizarVenda();
 
+        const itens = estado.venda.itens || [];
+        const ultimoItem = itens[itens.length - 1];
+        if (ultimoItem) {
+            elementos.quantidadeProduto.value = ultimoItem.nome_produto || "";
+            elementos.precoUnitario.textContent = formatarMoeda(
+                ultimoItem.preco_unitario,
+            );
+        }
+
         elementos.codigoProduto.value = "";
-        elementos.quantidadeProduto.value = "1";
+        elementos.quantidadeItem.value = "1";
         elementos.codigoProduto.focus();
 
         notificar("Produto adicionado à venda.");
@@ -272,26 +297,21 @@ function abrirPagamento() {
 async function confirmarPagamento(evento) {
     evento.preventDefault();
 
-    const formaPagamento = new FormData(
-        elementos.formularioPagamento,
-    ).get("forma_pagamento");
+    const formaPagamento = new FormData(elementos.formularioPagamento).get(
+        "forma_pagamento",
+    );
 
     if (!formaPagamento) {
         return;
     }
 
     try {
-        estado.venda = await finalizarVenda(
-            estado.venda.id,
-            formaPagamento,
-        );
+        estado.venda = await finalizarVenda(estado.venda.id, formaPagamento);
 
         elementos.modalPagamento.close();
         renderizarVenda();
 
-        notificar(
-            `Venda #${estado.venda.id} finalizada com sucesso.`,
-        );
+        notificar(`Venda #${estado.venda.id} finalizada com sucesso.`);
 
         // Após a finalização, o caixa fica pronto para uma nova venda.
         window.setTimeout(iniciarNovaVenda, 900);
@@ -305,9 +325,7 @@ async function cancelarVendaAtual() {
         return;
     }
 
-    const confirmou = window.confirm(
-        `Cancelar a venda #${estado.venda.id}?`,
-    );
+    const confirmou = window.confirm(`Cancelar a venda #${estado.venda.id}?`);
 
     if (!confirmou) {
         return;
@@ -360,16 +378,14 @@ async function realizarLogin(evento) {
         // O endpoint JWT não retorna o usuário completo.
         // Guardamos o nome digitado apenas para a identificação visual.
         estado.operador = { username: usuario };
+        console.log("Usuário logado:", estado.operador);
 
         sessionStorage.setItem("usuario_nome", usuario);
 
         mostrarPdv();
         await iniciarNovaVenda();
     } catch (erro) {
-        mostrarMensagem(
-            elementos.mensagemLogin,
-            erro.message,
-        );
+        mostrarMensagem(elementos.mensagemLogin, erro.message);
     }
 }
 
@@ -383,30 +399,15 @@ function sair() {
 
 elementos.formularioLogin.addEventListener("submit", realizarLogin);
 
-elementos.btnAdicionar.addEventListener(
-    "click",
-    adicionarProdutoNaVenda,
-);
+elementos.btnAdicionar.addEventListener("click", adicionarProdutoNaVenda);
 
-elementos.btnFinalizar.addEventListener(
-    "click",
-    abrirPagamento,
-);
+elementos.btnFinalizar.addEventListener("click", abrirPagamento);
 
-elementos.formularioPagamento.addEventListener(
-    "submit",
-    confirmarPagamento,
-);
+elementos.formularioPagamento.addEventListener("submit", confirmarPagamento);
 
-elementos.btnCancelar.addEventListener(
-    "click",
-    cancelarVendaAtual,
-);
+elementos.btnCancelar.addEventListener("click", cancelarVendaAtual);
 
-elementos.btnNovaVenda.addEventListener(
-    "click",
-    iniciarNovaVenda,
-);
+elementos.btnNovaVenda.addEventListener("click", iniciarNovaVenda);
 
 elementos.btnSair.addEventListener("click", sair);
 
@@ -438,8 +439,8 @@ document.addEventListener("keydown", (evento) => {
 
     if (evento.key === "F4") {
         evento.preventDefault();
-        elementos.quantidadeProduto.focus();
-        elementos.quantidadeProduto.select();
+        elementos.quantidadeItem.focus();
+        elementos.quantidadeItem.select();
     }
 
     if (evento.key === "F10") {

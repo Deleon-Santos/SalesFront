@@ -92,3 +92,10 @@ Finalizar + forma de pagamento
 A aplicação usa `sessionStorage` para o access token, reduzindo sua persistência em relação ao `localStorage`.
 
 Para produção, HTTPS é obrigatório e a estratégia de armazenamento de tokens deve ser revisada de acordo com a arquitetura de autenticação adotada.
+
+
+## desenvolvimento
+### backend
+--**checar se existe uma venda aberta com o user logado e integrar o item a venda aberta**
+--**implementar o id sequencial apenas para a venda gerado, ou numero sequencial de item no banco vendas.**
+--**nao permitir que o banco unifique os registros de item, possibilitando que o memo item seja adicionado com multiplas ocorrencias**
