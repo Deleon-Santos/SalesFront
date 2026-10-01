@@ -159,6 +159,7 @@ input:disabled {
   border-radius: var(--raio);
   outline: none;
   background: #ffffff;
+  
 }
 
 .cartao-login input:focus,
@@ -167,7 +168,12 @@ input:disabled {
   box-shadow: 0 0 0 3px rgba(23, 105, 170, 0.12);
 }
 
-
+.campo-descricao input, .campo-codigo input , .campo-quantidade input {
+    padding: 0 12px;
+    font-size: 2rem;
+    color: var(--primaria-escura);
+    font-weight: bolder;
+}
 .botao-primario,
 .botao-finalizar,
 .botao-adicionar,
@@ -236,7 +242,7 @@ input:disabled {
 
 .entrada-produto {
   display: grid;
-  grid-template-columns: 200px minmax(180px, 1fr) 100px 80px;
+  grid-template-columns: 260px minmax(180px, 1fr) 100px 80px;
   align-items: end;
   gap: 12px;
   padding: 14px;
@@ -340,6 +346,9 @@ td:nth-child(2),
 td:nth-child(3),
 td:nth-child(4) {
   white-space: nowrap;
+  font-family: monospace;
+  font-size:1.2rem;
+  padding: 5px 12px;
 }
 
 td strong,
@@ -386,6 +395,7 @@ td small {
 }
 .resumo-venda #preco-unitario {
   background-color: transparent;
+  color:var(--primaria-escura);
 }
 
 .acoes-venda {

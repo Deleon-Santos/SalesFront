@@ -156,7 +156,7 @@ function renderizarVenda() {
                 </td>
                 <td>
                     <small>${formatarMoeda(item.preco_unitario)}</small>
-                    <small>${item.quantidade}</small>
+                    <small>x${item.quantidade}</small>
                 </td>
                 <td>
                     <small>${formatarMoeda(item.subtotal)}</small>
