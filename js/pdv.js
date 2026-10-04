@@ -138,7 +138,7 @@ function renderizarVenda() {
     if (!itens.length) {
         elementos.listaProdutos.innerHTML = `
             <tr class="vazio">
-                <td colspan="4">Nenhum item adicionado</td>
+                <td colspan="5">Nenhum item adicionado</td>
             </tr>
         `;
     } else {
@@ -147,8 +147,8 @@ function renderizarVenda() {
                 (item) => `
             <tr>
                 <td>
-                    <small>${item.id}</small>
-                    <small>${item.outro_campo ?? "-"}</smail>
+                    <small>${String(item.n_item).padStart(3, '0')}</small>
+                    <small>${item.outro_campo ?? "---"}</small>
                 </td>
                 <td>
                     <small>${escaparHtml(item.nome_produto)}</small>
