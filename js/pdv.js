@@ -152,7 +152,7 @@ function renderizarVenda() {
                 </td>
                 <td>
                     <small>${escaparHtml(item.nome_produto)}</small>
-                    <small>${item.produto}</small>
+                    <small>${String(item.codigo_barras).padStart(13, '0')}</small>
                 </td>
                 <td>
                     <small>${formatarMoeda(item.preco_unitario)}</small>

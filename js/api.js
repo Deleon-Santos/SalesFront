@@ -115,7 +115,9 @@ export function adicionarItem(vendaId, produtoId, quantidade) {
     return requisicao("/itens-venda/", {
         method: "POST",
         body: corpoJson,
+        
     });
+    
 }
 
 // DELETE /api/itens-venda/{id}/
