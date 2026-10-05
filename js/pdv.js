@@ -148,7 +148,7 @@ function renderizarVenda() {
             <tr>
                 <td>
                     <small>${String(item.n_item).padStart(3, '0')}</small>
-                    <small>${item.outro_campo ?? "---"}</small>
+                    <small>${String(item.produto).padStart(6, '0')}</small>
                 </td>
                 <td>
                     <small>${escaparHtml(item.nome_produto)}</small>
@@ -160,7 +160,7 @@ function renderizarVenda() {
                 </td>
                 <td>
                     <small>${formatarMoeda(item.subtotal)}</small>
-                    <small>${"-"}</small>
+                    <small>${escaparHtml('-')}</small>
                 </td>
                 <td>
                     <button
