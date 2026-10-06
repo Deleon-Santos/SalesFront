@@ -448,7 +448,7 @@ document.addEventListener("keydown", (evento) => {
         abrirPagamento();
     }
 
-    if (evento.key === "Escape" && !elementos.modalPagamento.open) {
+    if (evento.key === "Delete" && !elementos.modalPagamento.open) {
         if (estado.venda) {
             cancelarVendaAtual();
         }
